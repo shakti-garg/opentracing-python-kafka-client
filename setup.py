@@ -11,6 +11,6 @@ setup(name='opentracing-python-kafka-client',
       author='Shakti Garg',
       author_email='shakti.garg@gmail.com',
       license='Apache License Version 2.0',
-      packages=find_packages(exclude=("tests", "tests.*")),
+      packages=find_packages(exclude=("test", "test.*")),
       install_requires=['confluent-kafka'],
       zip_safe=False)
