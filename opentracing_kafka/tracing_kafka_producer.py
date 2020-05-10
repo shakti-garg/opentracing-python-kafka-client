@@ -4,19 +4,17 @@ from confluent_kafka.cimpl import Producer
 from opentracing import tags, Format
 
 
-def error_logs(err) :
-    error_logs['event'] = tags.ERROR
-    error_logs['error.kind'] = err.__name__
-    error_logs['error.object'] = err
-    error_logs['error.message'] = str(err)
-
-    error_logs['error.stack'] = traceback.print_tb(err.__traceback__)
-
-    return error_logs;
+def error_logs(err):
+    return {'event': tags.ERROR,
+            'error.kind': err.__class__,
+            'error.object': err,
+            'error.message': str(err),
+            'error.stack': traceback.extract_tb(err.__traceback__)
+            }
 
 
 # curried callback function to wrap original 'on_delivery' callback
-def create_tracing_delivery_callback(self, on_delivery_fn, span):
+def create_tracing_delivery_callback(on_delivery_fn, span):
     def tracing_delivery_callback(err, msg):
         if err is not None:
             span.set_tag('error', 'true')
