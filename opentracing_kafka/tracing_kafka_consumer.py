@@ -16,6 +16,15 @@ class TracingKafkaConsumer(Consumer):
 
         return msg
 
+    def consume(self, num_messages=1, *args, **kwargs):
+        msgs = Consumer.consume(self, num_messages, args, kwargs)
+
+        for msg in msgs:
+            if msg is not None:
+                self.build_and_finish_child_span(msg)
+
+        return msgs
+
     def build_and_finish_child_span(self, msg):
         parent_context = self.tracer.extract(Format.TEXT_MAP, dict(msg.headers()))
         consumer_oper = "From_" + msg.topic()
