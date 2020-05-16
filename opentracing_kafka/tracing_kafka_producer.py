@@ -35,7 +35,7 @@ class TracingKafkaProducer(Producer):
         self.tracer = tracer
 
     def produce(self, topic, value=None, *args, **kwargs):
-        if kwargs['headers'] is None:
+        if kwargs.get('headers') is None:
             raise RuntimeError('message headers must be passed as parameters, ex: "headers = <>"')
 
         parent_context = self.tracer.extract(Format.TEXT_MAP, dict(kwargs['headers']))
