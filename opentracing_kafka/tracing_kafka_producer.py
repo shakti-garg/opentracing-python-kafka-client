@@ -52,4 +52,4 @@ class TracingKafkaProducer(Producer):
 
         kwargs['on_delivery'] = create_tracing_delivery_callback(kwargs['on_delivery'], span)
 
-        Producer.produce(self, topic, value, args, kwargs)
+        Producer.produce(self, topic, value, *args, **kwargs)

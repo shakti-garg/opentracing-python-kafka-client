@@ -17,7 +17,7 @@ class TracingKafkaConsumer(Consumer):
         return msg
 
     def consume(self, num_messages=1, *args, **kwargs):
-        msgs = Consumer.consume(self, num_messages, args, kwargs)
+        msgs = Consumer.consume(self, num_messages, *args, **kwargs)
 
         for msg in msgs:
             if msg is not None:
