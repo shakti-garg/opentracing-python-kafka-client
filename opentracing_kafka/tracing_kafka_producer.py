@@ -35,7 +35,9 @@ class TracingKafkaProducer(Producer):
         self.tracer = tracer
 
     def produce(self, topic, value=None, *args, **kwargs):
-        parent_context = self.tracer.extract(Format.TEXT_MAP, dict(kwargs.get('headers')))
+        msg_header_dict = dict() if kwargs.get('headers') is None else dict(kwargs.get('headers'))
+
+        parent_context = self.tracer.extract(Format.TEXT_MAP, msg_header_dict)
         producer_oper = "To_" + topic
         producer_tags = {tags.SPAN_KIND: tags.SPAN_KIND_PRODUCER,
                          tags.COMPONENT: 'python-kafka', tags.PEER_SERVICE: 'kafka',
@@ -45,7 +47,6 @@ class TracingKafkaProducer(Producer):
         span = self.tracer.start_span(producer_oper, child_of=parent_context, tags=producer_tags)
 
         # Inject created span context into message header for sending to kafka queue
-        msg_header_dict = dict(kwargs.get('headers'))
         self.tracer.inject(span.context, Format.TEXT_MAP, msg_header_dict)
         kwargs['headers'] = list(msg_header_dict.items())
 
