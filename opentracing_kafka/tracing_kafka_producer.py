@@ -1,7 +1,7 @@
 import traceback
 
 from confluent_kafka.cimpl import Producer
-from opentracing import tags, Format
+from opentracing import tags, Format, follows_from
 
 
 def error_logs(err):
@@ -44,7 +44,7 @@ class TracingKafkaProducer(Producer):
                          tags.MESSAGE_BUS_DESTINATION: topic
                          }
 
-        span = self.tracer.start_span(producer_oper, child_of=parent_context, tags=producer_tags)
+        span = self.tracer.start_span(producer_oper, references=follows_from(parent_context), tags=producer_tags)
 
         # Inject created span context into message header for sending to kafka queue
         self.tracer.inject(span.context, Format.TEXT_MAP, msg_header_dict)

@@ -1,5 +1,5 @@
 from confluent_kafka.cimpl import Consumer
-from opentracing import Format, tags
+from opentracing import Format, tags, follows_from
 
 
 class TracingKafkaConsumer(Consumer):
@@ -36,7 +36,7 @@ class TracingKafkaConsumer(Consumer):
                          'partition': msg.partition(), 'offset': msg.offset()
                          }
 
-        span = self.tracer.start_span(consumer_oper, child_of=parent_context, tags=consumer_tags)
+        span = self.tracer.start_span(consumer_oper, references=follows_from(parent_context), tags=consumer_tags)
         span.finish()
 
         # Inject created span context into message header for extraction by client to continue span chain
