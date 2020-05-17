@@ -26,7 +26,9 @@ class TracingKafkaConsumer(Consumer):
         return msgs
 
     def build_and_finish_child_span(self, msg):
-        parent_context = self.tracer.extract(Format.TEXT_MAP, dict(msg.headers()))
+        msg_header_text_dict = dict((key, binary_value.decode("utf-8")) for key, binary_value in msg.headers())
+
+        parent_context = self.tracer.extract(Format.TEXT_MAP, msg_header_text_dict)
         consumer_oper = "From_" + msg.topic()
         consumer_tags = {tags.SPAN_KIND: tags.SPAN_KIND_CONSUMER,
                          tags.COMPONENT: 'python-kafka', tags.PEER_SERVICE: 'kafka',
@@ -38,6 +40,5 @@ class TracingKafkaConsumer(Consumer):
         span.finish()
 
         # Inject created span context into message header for extraction by client to continue span chain
-        msg_header_dict = dict(msg.headers())
-        self.tracer.inject(span.context, Format.TEXT_MAP, msg_header_dict)
-        msg.set_headers(list(msg_header_dict.items()))
+        self.tracer.inject(span.context, Format.TEXT_MAP, msg_header_text_dict)
+        msg.set_headers(list(msg_header_text_dict.items()))
