@@ -1,7 +1,7 @@
 from confluent_kafka.cimpl import Consumer
 from opentracing import Format, tags, follows_from
 
-from utils import merge_two_dicts
+from opentracing_kafka.utils import merge_two_dicts
 
 
 def default_span_name_provider(msg):

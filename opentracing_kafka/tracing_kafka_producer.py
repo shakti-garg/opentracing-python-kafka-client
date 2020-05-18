@@ -3,7 +3,7 @@ import traceback
 from confluent_kafka.cimpl import Producer
 from opentracing import tags, Format, follows_from
 
-from utils import merge_two_dicts
+from opentracing_kafka.utils import merge_two_dicts
 
 
 def default_span_name_provider(topic, key, value):
