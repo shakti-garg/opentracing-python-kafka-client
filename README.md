@@ -1,3 +1,12 @@
+![License](https://img.shields.io/github/license/shakti-garg/opentracing-python-kafka-client)
+![Open Issues](https://img.shields.io/github/issues-raw/shakti-garg/opentracing-python-kafka-client)
+![Open PRs](https://img.shields.io/github/issues-pr-raw/shakti-garg/opentracing-python-kafka-client)
+![Contributors](https://img.shields.io/github/contributors/shakti-garg/opentracing-python-kafka-client)
+
+![Build Status](https://img.shields.io/circleci/build/github/shakti-garg/opentracing-python-kafka-client/master)
+![Version](https://img.shields.io/pypi/v/opentracing-python-kafka-client)
+![Downloads](https://img.shields.io/pypi/dm/opentracing-python-kafka-client)
+
 # opentracing-python-kafka-client
 OpenTracing Instrumentation library for Confluent-Kafka-Python applications.
 
