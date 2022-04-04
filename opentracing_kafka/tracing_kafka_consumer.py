@@ -23,6 +23,9 @@ def consumer_span_tags_provider(msg):
 def poll(consumer, timeout):
     return consumer.poll(timeout)
 
+def consume(consumer, num_messages, *args, **kwargs):
+    return consumer.consume(self, num_messages, *args, **kwargs)
+
 class TracingKafkaConsumer(Consumer):
 
     def __init__(self, config, tracer, span_name_provider=default_span_name_provider, span_tags_providers=[]):
@@ -71,10 +74,11 @@ class TracingKafkaConsumer(Consumer):
         :param kwargs:
         :return:
         """
-        msgs = Consumer.consume(self, num_messages, *args, **kwargs)
+        msgs = consume(Consumer, num_messages, *args, **kwargs)
 
         for msg in msgs:
             if msg is not None:
+                logging.debug('Building tracer span for consumed message')
                 self.build_and_finish_child_span(msg)
 
         return msgs
