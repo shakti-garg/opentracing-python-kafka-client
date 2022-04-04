@@ -1,3 +1,5 @@
+import logging
+
 from confluent_kafka.cimpl import Consumer
 from opentracing import Format, tags, follows_from
 
@@ -51,6 +53,7 @@ class TracingKafkaConsumer(Consumer):
         :return:
         """
         msg = Consumer.poll(self, timeout)
+        logging.debug('Polled Msg: ' + msg)
 
         if msg is not None:
             self.build_and_finish_child_span(msg)
@@ -67,6 +70,7 @@ class TracingKafkaConsumer(Consumer):
         :return:
         """
         msgs = Consumer.consume(self, num_messages, *args, **kwargs)
+        logging.debug('Polled Msgs: ' + msgs)
 
         for msg in msgs:
             if msg is not None:
