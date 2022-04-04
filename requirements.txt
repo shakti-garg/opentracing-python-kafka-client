@@ -1,2 +1,3 @@
 confluent-kafka==1.4.1
 opentracing==2.3.0
+mock
