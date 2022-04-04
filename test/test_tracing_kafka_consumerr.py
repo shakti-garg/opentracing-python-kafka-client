@@ -25,6 +25,9 @@ def mock_consumer_poll(consumer=None, timeout=None):
                                   ('key1', b'val1')],
                         topic='topic', partition=0, offset=23)
 
+def mock_consumer_poll_none(consumer=None, timeout=None):
+    return None
+
 
 class TestTracingKafkaConsumer(unittest.TestCase):
 
@@ -33,7 +36,6 @@ class TestTracingKafkaConsumer(unittest.TestCase):
         msg = kc.poll(1)
 
         logging.debug('Output Msg: ' + json.dumps(msg.__dict__))
-        logging.debug('Output Msg Headers: ' + json.dumps(msg.headers()))
 
         assert msg.headers() == [(field_name_trace_id, format(1, 'x')), (field_name_span_id, format(1, 'x')),
                                          ('key1', 'val1')]
@@ -44,6 +46,11 @@ class TestTracingKafkaConsumer(unittest.TestCase):
         assert msg.partition() == 0
         assert msg.offset() == 23
 
+    @patch('opentracing_kafka.tracing_kafka_consumer.poll', side_effect=mock_consumer_poll_none)
+    def test_should_not_build_and_finish_child_span_for_None_Message(self, mock_consumer_poll_obj):
+        msg = kc.poll(1)
+
+        assert msg is None
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,6 +1,8 @@
-from confluent_kafka.cimpl import Consumer
-from opentracing import Format, tags, follows_from
+import logging
 
+from confluent_kafka.cimpl import Consumer
+
+from opentracing import Format, tags, follows_from
 from opentracing_kafka.utils import merge_two_dicts
 
 
@@ -55,6 +57,7 @@ class TracingKafkaConsumer(Consumer):
         msg = poll(Consumer, timeout)
 
         if msg is not None:
+            logging.debug('Building tracer span for consumed message')
             self.build_and_finish_child_span(msg)
 
         return msg
