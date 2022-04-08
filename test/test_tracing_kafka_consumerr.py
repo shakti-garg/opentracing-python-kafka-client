@@ -19,16 +19,16 @@ tracer = MockTracer()
 kc = TracingKafkaConsumer({'group.id': 'cg-1'}, tracer)
 
 
-def mock_consumer_poll(consumer, timeout):
+def mock_consumer_poll(timeout):
     return MockMessage(key='key', value='value',
                         headers=[(field_name_trace_id, b'1'), (field_name_span_id, b'101'),
                                   ('key1', b'val1')],
                         topic='topic', partition=0, offset=23)
 
-def mock_consumer_poll_none(consumer, timeout):
+def mock_consumer_poll_none(timeout):
     return None
 
-def mock_consumer_consume(consumer, num_messages, *args, **kwargs):
+def mock_consumer_consume(num_messages, *args, **kwargs):
     return [MockMessage(key='key1', value='value1',
                         headers=[(field_name_trace_id, b'1'), (field_name_span_id, b'101'),
                                   ('key1', b'val1')],
@@ -39,7 +39,7 @@ def mock_consumer_consume(consumer, num_messages, *args, **kwargs):
                         topic='topic2', partition=2, offset=22)
             ]
 
-def mock_consumer_consume_none(consumer, num_messages, *args, **kwargs):
+def mock_consumer_consume_none(num_messages, *args, **kwargs):
     return []
 
 
