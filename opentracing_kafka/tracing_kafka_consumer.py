@@ -45,7 +45,7 @@ class TracingKafkaConsumer(Consumer):
         self.span_tags_providers = span_tags_providers
 
     def __poll_msg(self, timeout):
-        return Consumer.poll(timeout)
+        return Consumer.poll(self, timeout)
 
     def poll(self, timeout=None):
         """
