@@ -8,7 +8,7 @@ from opentracing.mocktracer.text_propagator import field_name_span_id, field_nam
 from opentracing_kafka.tracing_kafka_consumer import TracingKafkaConsumer
 from test.mock_message import MockMessage
 
-from mock import patch
+from mock import patch, MagicMock
 
 logging.getLogger('').handlers = []
 logging.basicConfig(level='DEBUG',
@@ -19,17 +19,13 @@ tracer = MockTracer()
 kc = TracingKafkaConsumer({'group.id': 'cg-1'}, tracer)
 
 
-def mock_consumer_poll(timeout):
-    return MockMessage(key='key', value='value',
+mock_poll_msg = MockMessage(key='key', value='value',
                         headers=[(field_name_trace_id, b'1'), (field_name_span_id, b'101'),
                                   ('key1', b'val1')],
                         topic='topic', partition=0, offset=23)
 
-def mock_consumer_poll_none(timeout):
-    return None
-
-def mock_consumer_consume(num_messages, *args, **kwargs):
-    return [MockMessage(key='key1', value='value1',
+mock_consume_msgs = [
+            MockMessage(key='key1', value='value1',
                         headers=[(field_name_trace_id, b'1'), (field_name_span_id, b'101'),
                                   ('key1', b'val1')],
                         topic='topic1', partition=1, offset=11),
@@ -39,17 +35,15 @@ def mock_consumer_consume(num_messages, *args, **kwargs):
                         topic='topic2', partition=2, offset=22)
             ]
 
-def mock_consumer_consume_none(num_messages, *args, **kwargs):
-    return []
-
 
 
 class TestTracingKafkaConsumer(unittest.TestCase):
 
-    @patch('opentracing_kafka.tracing_kafka_consumer.poll_msg', side_effect=mock_consumer_poll)
-    def a_test_should_build_and_finish_child_span_for_one_polled_message(self, mock_consumer_poll_obj):
-        msg = kc.poll(1)
+    @patch.object(TracingKafkaConsumer, '_TracingKafkaConsumer__poll_msg')
+    def a_test_should_build_and_finish_child_span_for_one_polled_message(self, poll_msg_mock: MagicMock):
+        poll_msg_mock.return_value = mock_poll_msg
 
+        msg = kc.poll(1)
         logging.debug('Output Msg: ' + json.dumps(msg.__dict__))
 
         assert msg.headers() == [(field_name_trace_id, format(1, 'x')), (field_name_span_id, format(1, 'x')),
@@ -61,14 +55,18 @@ class TestTracingKafkaConsumer(unittest.TestCase):
         assert msg.partition() == 0
         assert msg.offset() == 23
 
-    @patch('opentracing_kafka.tracing_kafka_consumer.poll_msg', side_effect=mock_consumer_poll_none)
-    def b_test_should_not_build_and_finish_child_span_for_none_polled_message(self, mock_consumer_poll_obj):
+    @patch.object(TracingKafkaConsumer, '_TracingKafkaConsumer__poll_msg')
+    def b_test_should_not_build_and_finish_child_span_for_none_polled_message(self, poll_msg_mock: MagicMock):
+        poll_msg_mock.return_value = None
+
         msg = kc.poll(1)
 
         assert msg is None
 
-    @patch('opentracing_kafka.tracing_kafka_consumer.consume_msgs', side_effect=mock_consumer_consume)
-    def c_test_should_build_and_finish_child_span_for_multiple_consumed_message(self, mock_consumer_consume_obj):
+    @patch.object(TracingKafkaConsumer, '_TracingKafkaConsumer__consume_msgs')
+    def c_test_should_build_and_finish_child_span_for_multiple_consumed_message(self, consume_msgs_mock: MagicMock):
+        consume_msgs_mock.return_value = mock_consume_msgs
+
         msgs = kc.consume(2)
 
         i=1
@@ -86,8 +84,10 @@ class TestTracingKafkaConsumer(unittest.TestCase):
 
             i=i+1
 
-    @patch('opentracing_kafka.tracing_kafka_consumer.consume_msgs', side_effect=mock_consumer_consume_none)
-    def d_test_should_not_build_and_finish_child_span_for_none_consumed_message(self, mock_consumer_consume_obj):
+    @patch.object(TracingKafkaConsumer, '_TracingKafkaConsumer__consume_msgs')
+    def d_test_should_not_build_and_finish_child_span_for_none_consumed_message(self, consume_msgs_mock: MagicMock):
+        consume_msgs_mock.return_value = None
+
         msgs = kc.consume(2)
 
         assert len(msgs) == 0
