@@ -84,7 +84,9 @@ class TracingKafkaConsumer(Consumer):
         return msgs
 
     def build_and_finish_child_span(self, msg):
-        msg_header_text_dict = dict((key, binary_value.decode("utf-8")) for key, binary_value in msg.headers())
+        msg_header_text_dict = {}
+        if msg.headers() is not None:
+            msg_header_text_dict = dict((key, binary_value.decode("utf-8")) for key, binary_value in msg.headers())
 
         parent_context = self.tracer.extract(Format.TEXT_MAP, msg_header_text_dict)
 
