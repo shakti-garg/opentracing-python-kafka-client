@@ -46,7 +46,7 @@ def mock_consumer_consume_none(num_messages, *args, **kwargs):
 
 class TestTracingKafkaConsumer(unittest.TestCase):
 
-    @patch('opentracing_kafka.tracing_kafka_consumer.poll', side_effect=mock_consumer_poll)
+    @patch('opentracing_kafka.tracing_kafka_consumer.poll_msg', side_effect=mock_consumer_poll)
     def a_test_should_build_and_finish_child_span_for_one_polled_message(self, mock_consumer_poll_obj):
         msg = kc.poll(1)
 
@@ -61,13 +61,13 @@ class TestTracingKafkaConsumer(unittest.TestCase):
         assert msg.partition() == 0
         assert msg.offset() == 23
 
-    @patch('opentracing_kafka.tracing_kafka_consumer.poll', side_effect=mock_consumer_poll_none)
+    @patch('opentracing_kafka.tracing_kafka_consumer.poll_msg', side_effect=mock_consumer_poll_none)
     def b_test_should_not_build_and_finish_child_span_for_none_polled_message(self, mock_consumer_poll_obj):
         msg = kc.poll(1)
 
         assert msg is None
 
-    @patch('opentracing_kafka.tracing_kafka_consumer.consume', side_effect=mock_consumer_consume)
+    @patch('opentracing_kafka.tracing_kafka_consumer.consume_msgs', side_effect=mock_consumer_consume)
     def c_test_should_build_and_finish_child_span_for_multiple_consumed_message(self, mock_consumer_consume_obj):
         msgs = kc.consume(2)
 
@@ -86,7 +86,7 @@ class TestTracingKafkaConsumer(unittest.TestCase):
 
             i=i+1
 
-    @patch('opentracing_kafka.tracing_kafka_consumer.consume', side_effect=mock_consumer_consume_none)
+    @patch('opentracing_kafka.tracing_kafka_consumer.consume_msgs', side_effect=mock_consumer_consume_none)
     def d_test_should_not_build_and_finish_child_span_for_none_consumed_message(self, mock_consumer_consume_obj):
         msgs = kc.consume(2)
 
